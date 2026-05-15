@@ -19,9 +19,9 @@ XStreamRoll is a powerful distributed streaming platform designed for developers
 
 ### Installation
 
-1. **Clone the repository**
+1. **Fork/Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/XStreamRollz/XStreamRoll
    cd xstreamroll
    ```
 
