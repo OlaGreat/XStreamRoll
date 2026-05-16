@@ -3,6 +3,7 @@ import { NestFactory } from "@nestjs/core"
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 import compression from "compression"
 import { AppModule } from "./app.module"
+import { SanitizeStringsPipe } from "./common/sanitization/sanitize-strings.pipe"
 
 // Bypass compression when the response is smaller than this. Anything
 // under ~1 KB doesn't benefit from gzip and the per-request CPU cost
@@ -18,12 +19,7 @@ async function bootstrap() {
     credentials: false,
   })
 
-  // Global response compression. The middleware honours the
-  // `Accept-Encoding` request header (gzip/deflate/br when available)
-  // and writes the matching `Content-Encoding` response header. Setting
-  // `threshold` skips small payloads; setting `filter` keeps existing
-  // `Content-Encoding` values intact and lets callers opt out via
-  // `x-no-compression`.
+  // Global response compression.
   app.use(
     compression({
       threshold: COMPRESSION_THRESHOLD_BYTES,
@@ -34,9 +30,11 @@ async function bootstrap() {
     }),
   )
 
-  // Global request validation: strip unknown properties, reject payloads
-  // with non-whitelisted keys, and auto-transform primitives to DTO types.
+  // Strip HTML/script tags from every string in the incoming payload
+  // before any other pipe runs. Order matters: sanitisation runs BEFORE
+  // ValidationPipe so DTO validators see already-stripped text.
   app.useGlobalPipes(
+    new SanitizeStringsPipe(),
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
