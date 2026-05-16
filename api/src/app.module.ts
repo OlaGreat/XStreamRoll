@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common"
 import { APP_GUARD } from "@nestjs/core"
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler"
 import { AdminModule } from "./admin/admin.module"
+import { AuditModule } from "./audit/audit.module"
 import { GatewaysModule } from "./gateways/gateways.module"
 import { HealthController } from "./health/health.controller"
 import { TagsModule } from "./tags/tags.module"
@@ -15,6 +16,7 @@ import { TagsModule } from "./tags/tags.module"
       },
     ]),
     AdminModule,
+    AuditModule,
     GatewaysModule,
     TagsModule,
   ],
