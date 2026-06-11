@@ -6,6 +6,7 @@ import { AuditModule } from "./audit/audit.module"
 import { AuthModule } from "./auth/auth.module"
 import { GatewaysModule } from "./gateways/gateways.module"
 import { HealthModule } from "./health/health.module"
+import { StreamsModule } from "./streams/streams.module"
 import { TagsModule } from "./tags/tags.module"
 
 @Module({
@@ -21,6 +22,7 @@ import { TagsModule } from "./tags/tags.module"
     AuthModule,
     GatewaysModule,
     HealthModule,
+    StreamsModule,
     TagsModule,
   ],
   providers: [
