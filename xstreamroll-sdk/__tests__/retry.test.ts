@@ -9,7 +9,7 @@ describe("withRetry", () => {
   })
 
   it("retries on retryable errors and eventually succeeds", async () => {
-    const err: any = new Error("boom")
+    const err = new Error("boom") as { status: number } & Error
     err.status = 503
     const fn = jest
       .fn()
@@ -32,7 +32,7 @@ describe("withRetry", () => {
   })
 
   it("throws after maxAttempts", async () => {
-    const err: any = new Error("boom")
+    const err = new Error("boom") as { status: number } & Error
     err.status = 500
     const fn = jest.fn().mockRejectedValue(err)
     await expect(

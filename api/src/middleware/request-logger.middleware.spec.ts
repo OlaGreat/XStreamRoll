@@ -1,11 +1,16 @@
+import { Response } from "express"
 import { RequestLoggerMiddleware } from "./request-logger.middleware"
+import type { AuthedRequest } from "./request-logger.middleware"
 
 type FakeResOptions = {
   statusCode?: number
   contentLength?: string | number | null
-  finishListeners?: Array<() => void>
 }
 
+/**
+ * Build a fake Express Request shaped as AuthedRequest.
+ * Only the properties read by the middleware are populated.
+ */
 function makeReq(overrides: Partial<{
   method: string
   path: string
@@ -13,7 +18,7 @@ function makeReq(overrides: Partial<{
   ip: string
   headers: Record<string, string>
   user: { id: number | string } | null
-}> = {}) {
+}> = {}): AuthedRequest {
   return {
     method: overrides.method ?? "GET",
     path: overrides.path ?? "/streams",
@@ -21,28 +26,34 @@ function makeReq(overrides: Partial<{
     ip: overrides.ip ?? "127.0.0.1",
     headers: overrides.headers ?? { "user-agent": "jest" },
     user: "user" in overrides ? overrides.user ?? undefined : undefined,
-  } as any
+  } as AuthedRequest
 }
 
-function makeRes(opts: FakeResOptions = {}) {
-  const res: any = {
+/**
+ * Build a fake Express Response and return it alongside a `fire()`
+ * helper that triggers the registered "finish" listener, simulating
+ * Express' response-completion lifecycle.
+ */
+function makeRes(opts: FakeResOptions = {}): { res: Response; fire: () => void } {
+  const listeners: Record<string, Array<() => void>> = {}
+  const res = {
     statusCode: opts.statusCode ?? 200,
-    listeners: {} as Record<string, Array<(...args: any[]) => void>>,
     getHeader(name: string) {
       if (name === "content-length") return opts.contentLength ?? null
       return null
     },
+    on(event: string, cb: () => void) {
+      listeners[event] = listeners[event] ?? []
+      listeners[event].push(cb)
+      return res
+    },
+  } as Response
+  return {
+    res,
+    fire: () => {
+      for (const cb of listeners["finish"] ?? []) cb()
+    },
   }
-  res.on = (event: string, cb: (...args: any[]) => void) => {
-    res.listeners[event] = res.listeners[event] ?? []
-    res.listeners[event].push(cb)
-    return res
-  }
-  return res
-}
-
-function fireFinish(res: any) {
-  for (const cb of res.listeners["finish"] ?? []) cb()
 }
 
 describe("RequestLoggerMiddleware", () => {
@@ -70,10 +81,10 @@ describe("RequestLoggerMiddleware", () => {
       headers: { "user-agent": "jest", "x-forwarded-for": "1.2.3.4, 10.0.0.1" },
       user: { id: 42 },
     })
-    const res = makeRes({ statusCode: 201, contentLength: "128" })
+    const { res, fire } = makeRes({ statusCode: 201, contentLength: "128" })
 
     mw.use(req, res, next)
-    fireFinish(res)
+    fire()
 
     expect(next).toHaveBeenCalledTimes(1)
     expect(logSpy).toHaveBeenCalledTimes(1)
@@ -103,10 +114,10 @@ describe("RequestLoggerMiddleware", () => {
       path: "/auth/login",
       user: null,
     })
-    const res = makeRes({ statusCode: 401 })
+    const { res, fire } = makeRes({ statusCode: 401 })
 
     mw.use(req, res, next)
-    fireFinish(res)
+    fire()
 
     const line = logSpy.mock.calls[0][0]
     const parsed = JSON.parse(line)
@@ -125,10 +136,10 @@ describe("RequestLoggerMiddleware", () => {
       originalUrl: "/streams/boom",
       path: "/streams/boom",
     })
-    const res = makeRes({ statusCode: 500 })
+    const { res, fire } = makeRes({ statusCode: 500 })
 
     mw.use(req, res, next)
-    fireFinish(res)
+    fire()
 
     expect(logSpy).not.toHaveBeenCalled()
     expect(errSpy).toHaveBeenCalledTimes(1)

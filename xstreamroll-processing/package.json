@@ -9,7 +9,7 @@
     "build": "tsc",
     "test": "jest",
     "test:cov": "jest --coverage",
-    "lint": "eslint --config ../../eslint.config.js src __tests__"
+    "lint": "eslint --config ../eslint.config.js src __tests__"
   },
   "jest": {
     "preset": "ts-jest",

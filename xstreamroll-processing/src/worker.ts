@@ -3,6 +3,7 @@ import { env } from "./config"
 import { EventFilter } from "./pipeline"
 import { SessionRegistry } from "./session-registry"
 import { ProcessedStreamEvent, StreamEvent } from "./session"
+import { Agent } from "http"
 import { GracefulShutdown } from "./lifecycle"
 
 const API_URL = env.API_URL
@@ -100,8 +101,8 @@ shutdown.register({
     // axios' default adapter uses the global http(s).Agent; calling
     // destroy() on the agent releases keep-alive sockets so the
     // process can exit promptly after drain.
-    const agent = new (require("http").Agent)()
-    if (typeof agent.destroy === "function") agent.destroy()
+    const agent = new Agent()
+    agent.destroy()
   },
 })
 

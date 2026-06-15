@@ -25,7 +25,7 @@ interface ToastOptions {
   duration?: number
 }
 
-function show(options: ToastOptions | string): string {
+function show(options: ToastOptions | string): string | number {
   if (typeof options === "string") {
     return sonnerToast(options)
   }

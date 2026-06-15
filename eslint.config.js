@@ -1,8 +1,5 @@
 // Shared ESLint flat config for the XStreamRoll monorepo.
-// Resolves #42: Add ESLint and Prettier config across all packages.
-//
-// Each workspace package (api, app, xstreamroll-sdk, xstreamroll-processing)
-// can run lint against this config from its own "lint" script.
+// Uses @typescript-eslint for TypeScript parsing across all packages.
 
 const ignores = [
   "**/node_modules/**",
@@ -16,15 +13,24 @@ const ignores = [
   "**/next-env.d.ts",
 ]
 
+const tsParser = require("@typescript-eslint/parser")
+const tsPlugin = require("@typescript-eslint/eslint-plugin")
+
 module.exports = [
   {
     ignores,
   },
   {
-    files: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
+      parser: tsParser,
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
       globals: {
         // Node
         process: "readonly",
@@ -51,6 +57,33 @@ module.exports = [
         beforeAll: "readonly",
         afterAll: "readonly",
         jest: "readonly",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-console": "off",
+      eqeqeq: ["error", "always", { null: "ignore" }],
+    },
+  },
+  {
+    files: ["**/*.{js,jsx,mjs,cjs}"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        process: "readonly",
+        console: "readonly",
+        module: "readonly",
+        require: "readonly",
+        exports: "readonly",
+        __dirname: "readonly",
+        __filename: "readonly",
+        global: "readonly",
       },
     },
     rules: {

@@ -15,6 +15,7 @@ describe("StreamStatusBadge", () => {
   it("falls back to the offline label for unknown statuses", () => {
     // Cast keeps the test honest about runtime safety: we should
     // degrade gracefully if a future API value sneaks through.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     render(<StreamStatusBadge status={"unknown" as any} />)
     expect(screen.getByText("Offline")).toBeInTheDocument()
   })

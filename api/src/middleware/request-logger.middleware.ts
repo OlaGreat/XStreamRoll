@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express"
 
 const SENSITIVE_PATH_PATTERNS: RegExp[] = [/^\/auth\b/]
 
-type AuthedRequest = Request & { user?: { id: number | string } }
+export type AuthedRequest = Request & { user?: { id: number | string } }
 
 @Injectable()
 export class RequestLoggerMiddleware implements NestMiddleware {

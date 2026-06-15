@@ -1,7 +1,7 @@
 import { Logger, withCorrelation, newCorrelationId } from "../src/logger"
 
 function makeLogger(level: "debug" | "info" | "warn" | "error" = "debug") {
-  const entries: any[] = []
+  const entries: Record<string, unknown>[] = []
   const logger = new Logger({
     workerId: "worker-test",
     level,

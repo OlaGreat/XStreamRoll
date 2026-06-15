@@ -38,6 +38,7 @@ describe("ConfirmDialog", () => {
       <ConfirmDialog
         title="Delete stream"
         description="This is permanent."
+        confirmLabel="Delete"
         onConfirm={onConfirm}
         trigger={<button>Open</button>}
       />
