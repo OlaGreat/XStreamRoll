@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common"
 import { JwtModule } from "@nestjs/jwt"
-import createJwtConfig from "../config/jwt.config"
+import createJwtConfig, { JWT_ACCESS_TOKEN_EXPIRES_IN } from "../config/jwt.config"
 import { MetricsModule } from "../metrics/metrics.module"
 import { StreamsGateway } from "./streams.gateway"
 
@@ -14,7 +14,7 @@ import { StreamsGateway } from "./streams.gateway"
   imports: [
     MetricsModule,
     JwtModule.registerAsync({
-      useFactory: () => createJwtConfig("1h"),
+      useFactory: () => createJwtConfig(JWT_ACCESS_TOKEN_EXPIRES_IN),
     }),
   ],
   providers: [StreamsGateway],
